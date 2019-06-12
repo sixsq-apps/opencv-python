@@ -1,0 +1,57 @@
+language: minimal
+dist: xenial
+sudo: required
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+env:
+  global:
+    - DOCKER_ORG=sixsq
+    - DOCKER_IMAGE=opencv-python
+    - DOCKER_CLI_EXPERIMENTAL=enabled
+    - HADOLINT="${HOME}/hadolint"
+    # DOCKER_USERNAME
+    - secure: "rx5u9fIjkTVJkCpOJIfhzRYdm+2Yf6GlLZBkFTh2XwxMakeRbdtNq+187Eib8tuXKOY5HdqK903PvID8NjElCmzkr2ldypHEnI8UEV1nrZ1bNd4rFEBHBRguxxbMJlG7OPfMIqQI9U4344j0BYkwK5NfDCBFu516qJ5Th4C+tAOFEAr/fs8C/uDtuKEF2Vp2o1mSrdqxhRmGLCXA72VQn0OzxEkLsP3ilMjHQ9d8Jo/KzaEWBsylFpXmVAyHm8NbB2hT0IuGe5JkUoCllNWc4AKjeQkp7vmPuQH3rk+v6Wl+UnbCEkfsKmpE7uNdQwL8oJjJzBGlX79danRUAk8U6mAgZHkjn3H17dTPz8PskrnlUTjV2MktWlngcXa0na8YWUR1LwYrzmPHNKUFCTqjEDSXbprTjDz65PFrthIO1fPFNc8cSc3sBazbNbjxZ9ouWvOuY9H7U2YoAMtVFaLlzJnCactZq3HWcuxTZS9iP0pftR269CEJV2adUX6zeXy/ojqRc+r2izd1S/suLBwkGyi6U6qSNt1AFErTQF+ABaocYi0JagBXePR4+aRqpOo1CyaNP9T4ZADOUyuZCO+/sqZXQtnpQlGpvmI09yWSe/gTOMCIDLTDLHVVZMr+1un/RusAFFY7B93tRbXEnRwVwDRN3HUNKzghE/DNTwGrjMs="
+    # DOCKER_PASSWORD
+    - secure: "WOM6FSuehtO/HOfSsBPdURKhHiB/5N1hDTT06FvMAECh+UaPJ3Fu6bMO7ifzzKBEK8JX2wECzk+qlbcux5I0B+bSYZ915Dh4sk3bEB9aLJb32l98dAs7bnCkzXkC2MdyHeZTSHzDUESfqEKSmirb8HudByWC9x0608P+ACup3pEjGqoFMASS9bgjdXMMldvZFecMHydtvvrW3haJFrzKsmY4kfZrlX5+2skTQri2UcTkEsUd4eIfUgjsNTC6AvLLOObSpYQQOxQoc4RlgNYUbswFiTlU5JIHVfR/4F5xIrGx6yN33g0wdMr2Gc9lNFMFpKKQEeSq5SXzi/N9aQMYjAhhsD8cIf7/anu7daNlRCi0A4es6sBlO9EPrFGCe+2qgHqu3FWZ5DY22hBlMqSjhQual7OMs/8jITCBog2aPz0XNIRNgNy87GMU0SGxdN7NXhHtIS3WQcHfAzQRPS975LBzAc9JcJ7sK5WYF/U6P3GmxCP4mnugHPD07Q91SgE6woq7pIeE32vfgdEwRtfUXaFsmkUbsO46wxf2R6gWmkApsDZ3pIRxe0J+ve+USVt7rIC7gt2rMBSTpzfUH4sPmZ6MHZMWoThRzQzbCZKQHkDf3une7zRQVIxZYF98eGbqL92YAoa3xtLhqE83iywR7srr9hG5aPkfigusu1lFas8="
+
+before_install:
+  - echo "options timeout:5" | sudo tee -a /etc/resolvconf/resolv.conf.d/tail
+  - echo "options attempts:5" | sudo tee -a /etc/resolvconf/resolv.conf.d/tail
+  - sudo service resolvconf restart
+  - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+  - sudo systemctl restart docker
+  - sudo docker run --privileged linuxkit/binfmt:v0.6
+
+install:
+  - docker image pull moby/buildkit:master
+
+before_script:
+  # remove any previous builds
+  - rm -Rf target/*.tar
+  - mkdir -p target
+
+jobs:
+  include:
+  - stage: test
+    install: skip
+    script: ./.travis/test.sh
+  - stage: build
+    script: ./.travis/build.sh
+#    env: PLATFORM=amd64
+#  - script: ./.travis/build.sh
+#    env: PLATFORM=arm64
+#  - script: ./.travis/build.sh
+    env: PLATFORM=arm
+  - stage: deploy
+    script: ./.travis/push.sh
+    env: PLATFORMS='arm'
+    install: skip
+    on:
+      all_branches: true
