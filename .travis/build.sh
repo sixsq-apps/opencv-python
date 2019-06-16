@@ -3,6 +3,7 @@
 tag_name=${TRAVIS_TAG:-${TRAVIS_BRANCH}}
 platform=${PLATFORM:-amd64}
 manifest=${DOCKER_ORG}/${DOCKER_IMAGE}:${tag_name}
+dockerfile="Dockerfile"; [ "$platform" = "arm" ] && dockerfile="${dockerfile}.arm"
 
 # Login to docker hub
 unset HISTFILE; set +x; echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin; set -x
@@ -12,7 +13,7 @@ docker run --rm --privileged -v ${PWD}:/tmp/work --entrypoint buildctl-daemonles
        build \
        --frontend dockerfile.v0 \
        --opt platform=linux/${platform} \
-       --opt filename=./Dockerfile \
+       --opt filename=./${dockerfile} \
        --opt build-arg:GIT_BRANCH=${TRAVIS_BRANCH} \
        --opt build-arg:GIT_COMMIT_ID=${TRAVIS_COMMIT} \
        --opt build-arg:TRAVIS_BUILD_NUMBER=${TRAVIS_BUILD_NUMBER} \

@@ -44,14 +44,14 @@ jobs:
     script: ./.travis/test.sh
   - stage: build
     script: ./.travis/build.sh
-#    env: PLATFORM=amd64
+    env: PLATFORM=amd64
 #  - script: ./.travis/build.sh
 #    env: PLATFORM=arm64
-#  - script: ./.travis/build.sh
+  - script: ./.travis/build.sh
     env: PLATFORM=arm
   - stage: deploy
     script: ./.travis/push.sh
-    env: PLATFORMS='arm'
+    env: PLATFORMS='amd64 arm'
     install: skip
     on:
       all_branches: true

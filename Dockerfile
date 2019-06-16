@@ -1,13 +1,8 @@
-# hadolint ignore=DL3007
-FROM raspbian/stretch:latest
+FROM ubuntu:18.04
 
-COPY pip.conf /etc/
-RUN apt update && apt upgrade -y
 RUN apt update && \
-    apt install -y wget python3-numpy libatlas-base-dev libwebp6 \
-                   libtiff5 libjasper1 libilmbase12 libopenexr22 \
-                   libgstreamer1.0-0 libavcodec57 libswscale4 libqt4-test \
-                   libqtcore4 libqtgui4 libjpeg62-turbo libavformat57 && \
+    apt install -y wget python3 python3-distutils libglib2.0-0 libsm6 libxrender1 libxext6 && \
     wget https://bootstrap.pypa.io/get-pip.py && \
     python3 get-pip.py && \
-    pip3 install opencv-python
+    pip3 install opencv-python && \
+    rm -rf /var/lib/apt/lists/*
