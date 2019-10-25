@@ -3,7 +3,7 @@
 tag_name=${TRAVIS_TAG:-${TRAVIS_BRANCH}}
 platform=${PLATFORM:-amd64}
 manifest=${DOCKER_ORG}/${DOCKER_IMAGE}:${tag_name}
-dockerfile="Dockerfile"; [ "$platform" = "arm"* ] && dockerfile="${dockerfile}.arm"
+dockerfile="Dockerfile"; [[ "$platform" == "arm"* ]] && dockerfile="${dockerfile}.arm"
 
 # Login to docker hub
 unset HISTFILE; set +x; echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin; set -x
