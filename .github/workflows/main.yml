@@ -1,4 +1,4 @@
-name: "OpenCV Python Container Build"
+name: "Build"
 
 on:
   push:
@@ -9,16 +9,12 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -28,42 +24,37 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Run unit tests
+        run: |
+          pip install -r code/requirements.tests.txt
+          pytest code/tests --junitxml=test-report.xml -v
+
       - name: Multi-arch docker image build prerequired
         run: sudo docker run --privileged linuxkit/binfmt:v0.8
 
-      - name: Test
+      - name: Build and deploy on architecture
         env:
-          HADOLINT: "/tmp/hadolint"
-        run: ./.ci/test.sh
-
-      - name: Build on amd64
-        env:
-          PLATFORM: amd64
           DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
-        run: ./.ci/build.sh
+        run: ./container-release.sh
 
-      - name: Build on arm64
-        env:
-          PLATFORM: arm64
-          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
-        run: ./.ci/build.sh
+      - name: Get component dependencies
+        run: ./get-dependencies-tree.sh
 
-      - name: Build on arm
-        env:
-          PLATFORM: arm
-          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
-        run: ./.ci/build.sh
+      - name: Keep list of dependencies as an artifact
+        uses: actions/upload-artifact@v2
+        if: ${{ success() }}
+        with:
+          name: dependencies
+          path: |
+            dependencies-tree.png
+            dependencies-licenses.txt
 
-      - name: Deploy
-        env:
-          PLATFORM: "amd64 arm arm64"
-          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
-        run: ./.ci/push.sh
-
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: test-report.xml
 
   notify:
     if: always()
