@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt update && \
     apt install -y wget python3 python3-distutils libglib2.0-0 libsm6 libxrender1 libxext6 && \
