@@ -4,7 +4,7 @@ FROM raspbian/stretch:latest
 COPY pip.conf /etc/
 RUN apt update && apt upgrade -y
 RUN apt update && \
-    apt install -y wget python3-numpy libatlas-base-dev libwebp6 \
+    DEBIAN_FRONTEND=noninteractive apt install -y wget python3-numpy libatlas-base-dev libwebp6 \
                    libtiff5 libjasper1 libilmbase12 libopenexr22 \
                    libgstreamer1.0-0 libavcodec57 libswscale4 libqt4-test \
                    libqtcore4 libqtgui4 libjpeg62-turbo libavformat57 python3-pip && \
