@@ -6,8 +6,8 @@ on:
       - "*.*.*"
 
 env:
-  DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_ORG: nuvlabox
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
