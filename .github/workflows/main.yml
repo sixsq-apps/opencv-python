@@ -1,0 +1,82 @@
+name: "OpenCV Python Container Build"
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*.*'
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Multi-arch docker image build prerequired
+        run: sudo docker run --privileged linuxkit/binfmt:v0.8
+
+      - name: Test
+        env:
+          HADOLINT: "/tmp/hadolint"
+        run: ./.ci/test.sh
+
+      - name: Build on amd64
+        env:
+          PLATFORM: amd64
+          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+        run: ./.ci/build.sh
+
+      - name: Build on arm64
+        env:
+          PLATFORM: arm64
+          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+        run: ./.ci/build.sh
+
+      - name: Build on arm
+        env:
+          PLATFORM: arm
+          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+        run: ./.ci/build.sh
+
+      - name: Deploy
+        env:
+          PLATFORM: "amd64 arm arm64"
+          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+        run: ./.ci/push.sh
+
+
+  notify:
+    if: always()
+    name: Post Workflow Status To Slack
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Workflow Notification
+        uses: Gamesight/slack-workflow-status@master
+        with:
+          # Required Input
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}
+          # Optional Input
+          icon_emoji: ':ghost:'
