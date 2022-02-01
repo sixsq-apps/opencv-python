@@ -9,7 +9,7 @@ DOCKER_IMAGE=$(basename `git rev-parse --show-toplevel`)
 GIT_BRANCH=$(echo ${GITHUB_REF} | awk -F'/' '{print $(NF)}' | sed -e 's/[^a-z0-9\._-]/-/g')
 
 # non-tagged builds are not releases, so they always go on nuvladev
-DOCKER_ORG=${DOCKER_ORG:-nuvladev}
+DOCKER_ORG=sixsq
 
 MANIFEST=${DOCKER_ORG}/${DOCKER_IMAGE}:${GIT_BRANCH}
 
