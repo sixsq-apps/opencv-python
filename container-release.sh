@@ -34,7 +34,7 @@ for platform in "${platforms[@]}"; do
            build \
            --frontend dockerfile.v0 \
            --opt platform=linux/${platform} \
-           --opt filename=./Dockerfile \
+           --opt filename=./${dockerfile} \
            --opt build-arg:GIT_BRANCH=${GIT_BRANCH} \
            --opt build-arg:GIT_BUILD_TIME=${GIT_BUILD_TIME} \
            --opt build-arg:GIT_COMMIT_ID=${GITHUB_SHA} \
