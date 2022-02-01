@@ -2,7 +2,7 @@
 
 ###############################
 #  CHANGE THIS ON EVERY REPO  #
-DOCKER_IMAGE=$(basename `git rev-parse --show-toplevel`)
+DOCKER_IMAGE="opencv-python"
 ###############################
 
 # default env vars in GH actions
