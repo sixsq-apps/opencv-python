@@ -29,6 +29,7 @@ mkdir -p target
 
 for platform in "${platforms[@]}"; do
     GIT_BUILD_TIME=$(date --utc +%FT%T.%3NZ)
+    dockerfile="Dockerfile"; [[ "$platform" == "arm"* ]] && dockerfile="${dockerfile}.arm"
     docker run --rm --privileged -v ${PWD}:/tmp/work --entrypoint buildctl-daemonless.sh moby/buildkit:master \
            build \
            --frontend dockerfile.v0 \
