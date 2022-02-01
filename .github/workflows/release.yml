@@ -21,8 +21,8 @@ jobs:
 
       - name: Build and deploy on architecture
         env:
-          DOCKER_USERNAME: ${{ secrets.SIXSQ_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.SIXSQ_DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_ORG: nuvlabox
         run: ./container-release.sh
 
