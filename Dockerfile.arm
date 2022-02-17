@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM debian:buster
+FROM raspbian/stretch:latest
 
 COPY pip.conf /etc/
 RUN apt update && apt upgrade -y
